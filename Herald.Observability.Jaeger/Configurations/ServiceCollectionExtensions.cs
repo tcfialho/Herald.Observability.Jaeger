@@ -6,10 +6,13 @@ using Jaeger.Senders.Thrift;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using OpenTracing.Contrib.NetCore.Configuration;
 using OpenTracing.Util;
 
 using System;
+
+using static Jaeger.Configuration;
 
 namespace Herald.Observability.Jaeger.Configurations
 {
@@ -103,10 +106,15 @@ namespace Herald.Observability.Jaeger.Configurations
             var reporterConfig = new Configuration.ReporterConfiguration(loggerFactory);
             reporterConfig.WithSender(senderConfig);
 
+            var codecConfiguration = new Configuration.CodecConfiguration(loggerFactory)
+                .WithPropagation(Propagation.Jaeger)
+                .WithPropagation(Propagation.B3);
+
             // Configuration
             var tracerConfig = new Configuration(options.ServiceName, loggerFactory)
                     .WithSampler(samplerConfig)
-                    .WithReporter(reporterConfig);
+                    .WithReporter(reporterConfig)
+                    .WithCodec(codecConfiguration);
 
             return tracerConfig;
         }
